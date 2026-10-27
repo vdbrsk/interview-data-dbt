@@ -1,0 +1,19 @@
+name: kestrel_analytics
+version: "1.0.0"
+config-version: 2
+profile: kestrel_analytics
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+models:
+  kestrel_analytics:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts

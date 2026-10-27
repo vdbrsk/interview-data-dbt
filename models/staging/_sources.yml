@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: app
+    description: "Kestrel Learning application database replica (synthetic structure)."
+    schema: raw_app
+    tables:
+      - name: customers
+        description: "One row per parent account."
+      - name: subscriptions
+        description: "One row per purchased tutoring plan."
+      - name: orders
+        description: "One row per billing event: first purchase, renewal or refund."
+      - name: bookings
+        description: "One row per scheduled demo or lesson slot."
+      - name: payments
+        description: "One row per card payment attempt against an order."

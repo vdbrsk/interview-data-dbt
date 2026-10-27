@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: "One row per external (non-internal) customer. Grain: customer_id."
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: stg_subscriptions
+    description: "One row per subscription of an external customer. Grain: subscription_id."
+    columns:
+      - name: subscription_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships: {to: ref('stg_customers'), field: customer_id}
+      - name: status
+        description: "TRIALING, ACTIVE, PAUSED, CANCELED, EXPIRED."
+        tests:
+          - accepted_values: {values: [TRIALING, ACTIVE, PAUSED, CANCELED, EXPIRED]}
+  - name: stg_orders
+    description: "One row per billing event. Refunds are separate rows with order_type = REFUND. Grain: order_id."
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: order_type
+        tests:
+          - accepted_values: {values: [PURCHASE, RENEWAL, REFUND]}
+      - name: status
+        tests:
+          - accepted_values: {values: [SETTLED, PENDING, FAILED]}
+      - name: amount_usd
+        description: "Always positive, including for REFUND rows."
+  - name: stg_bookings
+    description: "One row per booking slot. Grain: booking_id."
+    columns:
+      - name: booking_id
+        tests: [unique, not_null]
+      - name: booking_type
+        tests:
+          - accepted_values: {values: [DEMO, LESSON]}
+      - name: status
+        tests:
+          - accepted_values: {values: [SCHEDULED, ATTENDED, NO_SHOW, CANCELED]}
+  - name: stg_payments
+    description: "One row per payment attempt. An order can have several attempts. Grain: payment_id."
+    columns:
+      - name: payment_id
+        tests: [unique, not_null]
+      - name: status
+        tests:
+          - accepted_values: {values: [SUCCESS, FAILED]}

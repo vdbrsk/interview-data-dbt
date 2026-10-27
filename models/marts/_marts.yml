@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "One row per external customer. Grain: customer_id."
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: is_paying_customer
+        description: "True once the customer has a settled PURCHASE order."
+  - name: fct_orders
+    description: >
+      One row per billing event. Grain: order_id.
+      revenue_usd is signed (refunds negative) and 0 for unpaid orders.
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships: {to: ref('dim_customers'), field: customer_id}
+      - name: subscription_id
+        description: "Nullable: not every order belongs to a subscription."
+        tests:
+          - relationships: {to: ref('fct_subscriptions'), field: subscription_id}
+      - name: revenue_usd
+        description: "Signed amount, 0 while paid_at is null."
+  - name: fct_subscriptions
+    description: "One row per subscription. Grain: subscription_id. A customer can hold several (one per subject)."
+    columns:
+      - name: subscription_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships: {to: ref('dim_customers'), field: customer_id}
+      - name: is_active
+        description: "status = ACTIVE. TRIALING and PAUSED are not active."
+  - name: fct_bookings
+    description: "One row per demo or lesson slot. Grain: booking_id."
+    columns:
+      - name: booking_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships: {to: ref('dim_customers'), field: customer_id}
+      - name: subscription_id
+        description: "Nullable: demos happen before any subscription exists."
+  - name: fct_payments
+    description: "One row per payment attempt. Grain: payment_id. Several attempts can belong to one order."
+    columns:
+      - name: payment_id
+        tests: [unique, not_null]
+      - name: order_id
+        tests:
+          - relationships: {to: ref('fct_orders'), field: order_id}

@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: int_orders_signed
+    description: "stg_orders plus revenue_usd (signed, 0 when unpaid). Grain: order_id."
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+  - name: int_customer_first_purchase
+    description: "First paid PURCHASE per customer. Grain: customer_id."
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: int_bookings_classified
+    description: "stg_bookings plus demo / outcome flags. Grain: booking_id."
+    columns:
+      - name: booking_id
+        tests: [unique, not_null]
